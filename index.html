@@ -5,96 +5,204 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zip Chatbot</title>
 <style>
-  body { margin: 0; font-family: sans-serif; }
+  body { margin: 0; font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
 
   #chat-bubble {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    width: 60px;
-    height: 60px;
-    background-color: #ff7eb9;
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #00b09b, #96c93d);
     border-radius: 50%;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: grab;
     z-index: 9999;
-    transition: all 0.3s;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    animation: float 3s ease-in-out infinite;
+  }
+  #chat-bubble:hover {
+    transform: scale(1.1);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.3);
   }
 
-  #chat-bubble img { width: 30px; height: 30px; }
+  #chat-bubble img { 
+    width: 36px; 
+    height: 36px; 
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    transition: transform 0.3s;
+  }
+  #chat-bubble:hover img {
+    transform: rotate(15deg);
+  }
 
   #chat-box {
     position: fixed;
-    bottom: 90px;
+    bottom: 100px;
     right: 20px;
-    width: 350px;
-    height: 480px;
-    border-radius: 16px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    width: 380px;
+    height: 500px;
+    border-radius: 18px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
     background: white;
     display: none;
     flex-direction: column;
     overflow: hidden;
     z-index: 9999;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  #chat-box.active {
+    transform: translateY(0);
+    opacity: 1;
   }
 
   #chat-header {
-    background: #ff7eb9;
+    background: linear-gradient(135deg, #00b09b, #96c93d);
     color: white;
-    padding: 10px;
-    font-weight: bold;
+    padding: 14px;
+    font-weight: 600;
     text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  #chat-header .close-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0 8px;
   }
 
   #chat-messages {
     flex: 1;
-    padding: 10px;
+    padding: 16px;
     overflow-y: auto;
+    background-color: #f9f9f9;
+    background-image: 
+      linear-gradient(#f1f1f1 1px, transparent 1px),
+      linear-gradient(90deg, #f1f1f1 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  #chat-messages::-webkit-scrollbar {
+    width: 6px;
+  }
+  #chat-messages::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.2);
+    border-radius: 3px;
   }
 
   .msg {
-    margin: 8px 0;
-    padding: 8px 12px;
-    border-radius: 12px;
-    max-width: 75%;
-    line-height: 1.4;
+    margin: 10px 0;
+    padding: 12px 16px;
+    border-radius: 8px;
+    max-width: 80%;
+    line-height: 1.5;
+    position: relative;
+    font-size: 14px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+    margin-left: 8px;
+    margin-right: 8px;
   }
-
-  .user { background: #e0ffe0; align-self: flex-end; }
-  .bot { background: #f0f0f0; align-self: flex-start; }
+  .msg:hover {
+    transform: scale(1.02);
+  }
+  .user { 
+    background: linear-gradient(135deg, #00b09b, #96c93d);
+    color: white;
+    margin-left: auto;
+    margin-right: 0;
+  }
+  .bot { 
+    background: linear-gradient(135deg, #00b6a0, #5cc48a);
+    color: white;
+    margin-left: 0;
+    margin-right: auto;
+  }
+  .msg-time {
+    display: block;
+    font-size: 10px;
+    opacity: 0.7;
+    margin-top: 4px;
+    text-align: right;
+  }
 
   #chat-input {
     display: flex;
-    border-top: 1px solid #ccc;
+    border-top: 1px solid #eee;
+    background: white;
   }
-
   #chat-input input {
     flex: 1;
-    padding: 10px;
+    padding: 14px;
     border: none;
     outline: none;
+    font-size: 14px;
+    background: transparent;
   }
-
   #chat-input button {
-    background: #ff7eb9;
+    background: linear-gradient(135deg, #00b09b, #96c93d);
     color: white;
     border: none;
-    padding: 10px 16px;
+    padding: 0 18px;
     cursor: pointer;
+    transition: all 0.2s;
+  }
+  #chat-input button:hover {
+    opacity: 0.9;
+  }
+  #chat-input button i {
+    font-size: 18px;
+  }
+  .typing-indicator {
+    display: flex;
+    padding: 8px 16px;
+    background: white;
+    border-radius: 14px;
+    margin: 4px 0;
+    width: fit-content;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  .typing-dot {
+    width: 8px;
+    height: 8px;
+    background: #00b09b;
+    border-radius: 50%;
+    margin: 0 2px;
+    animation: typingAnimation 1.4s infinite ease-in-out;
+  }
+  .typing-dot:nth-child(1) { animation-delay: 0s; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingAnimation {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-4px); }
   }
 </style>
 </head>
 <body>
 
-<div id="chat-bubble" title="Chat với Zip 🤖">
-  <img src="https://cdn-icons-png.flaticon.com/512/134/134914.png">
+<div id="chat-bubble" title="ZipAI Chat Assistant">
+  <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" style="filter: brightness(0) invert(1);">
 </div>
 
 <div id="chat-box">
-  <div id="chat-header">Zip Chatbot 💬</div>
+  <div id="chat-header">
+    <span>ZipAI Assistant</span>
+    <button class="close-btn" title="Close chat">×</button>
+  </div>
   <div id="chat-messages"></div>
   <div id="chat-input">
     <input type="text" id="userInput" placeholder="Nhập tin nhắn...">
@@ -105,12 +213,26 @@
 <script>
 const bubble = document.getElementById("chat-bubble");
 const chatBox = document.getElementById("chat-box");
+const closeBtn = document.querySelector('.close-btn');
 let dragging = false, offsetX, offsetY;
+let isChatOpen = false;
 
-bubble.addEventListener("click", () => {
-  chatBox.style.display = (chatBox.style.display === "flex") ? "none" : "flex";
-});
+// Toggle chat box with animation
+function toggleChat() {
+  isChatOpen = !isChatOpen;
+  if (isChatOpen) {
+    chatBox.style.display = 'flex';
+    setTimeout(() => chatBox.classList.add('active'), 10);
+  } else {
+    chatBox.classList.remove('active');
+    setTimeout(() => chatBox.style.display = 'none', 300);
+  }
+}
 
+bubble.addEventListener("click", toggleChat);
+closeBtn.addEventListener("click", toggleChat);
+
+// Make bubble draggable
 bubble.addEventListener("mousedown", e => {
   dragging = true;
   offsetX = e.clientX - bubble.getBoundingClientRect().left;
@@ -124,6 +246,30 @@ document.addEventListener("mousemove", e => {
   bubble.style.top = e.clientY - offsetY + "px";
   bubble.style.bottom = "auto";
   bubble.style.right = "auto";
+  
+  // Keep chat box position relative to bubble and within viewport
+  if (isChatOpen) {
+    const bubbleRect = bubble.getBoundingClientRect();
+    const chatWidth = chatBox.offsetWidth;
+    const chatHeight = chatBox.offsetHeight;
+    
+    // Calculate positions
+    let left = bubbleRect.left + bubble.offsetWidth/2 - chatWidth/2;
+    let bottom = window.innerHeight - bubbleRect.top + 20;
+    
+    // Ensure chat box stays within viewport
+    if (left < 10) left = 10;
+    if (left + chatWidth > window.innerWidth - 10) {
+      left = window.innerWidth - chatWidth - 10;
+    }
+    if (bottom + chatHeight > window.innerHeight - 10) {
+      bottom = window.innerHeight - chatHeight - 10;
+    }
+    
+    chatBox.style.right = "auto";
+    chatBox.style.left = left + "px";
+    chatBox.style.bottom = bottom + "px";
+  }
 });
 
 document.addEventListener("mouseup", () => {
@@ -131,6 +277,7 @@ document.addEventListener("mouseup", () => {
   bubble.style.cursor = "grab";
 });
 
+// Chat functionality
 const sendBtn = document.getElementById("sendBtn");
 const userInput = document.getElementById("userInput");
 const messages = document.getElementById("chat-messages");
@@ -138,22 +285,76 @@ const messages = document.getElementById("chat-messages");
 function appendMessage(text, sender) {
   const msg = document.createElement("div");
   msg.classList.add("msg", sender);
-  msg.textContent = text;
+  
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  msg.innerHTML = `${text}<span class="msg-time">${time}</span>`;
+  
   messages.appendChild(msg);
   messages.scrollTop = messages.scrollHeight;
 }
 
-sendBtn.onclick = async () => {
+function showTypingIndicator() {
+  const typing = document.createElement("div");
+  typing.className = "typing-indicator";
+  typing.innerHTML = `
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+  `;
+  messages.appendChild(typing);
+  messages.scrollTop = messages.scrollHeight;
+  return typing;
+}
+
+function sendMessage() {
   const text = userInput.value.trim();
   if (!text) return;
+  
   appendMessage(text, "user");
   userInput.value = "";
-  appendMessage("Đang xử lý...", "bot");
-
+  
+  const typingIndicator = showTypingIndicator();
+  
   setTimeout(() => {
-    messages.lastChild.textContent = "🤖 Zip trả lời: " + text.split("").reverse().join("");
-  }, 800);
-};
+    messages.removeChild(typingIndicator);
+    const responses = [
+      `Xin chào! Tôi là ZipAI. Bạn hỏi "${text}" phải không?`,
+      `Tôi đã nhận được câu hỏi: "${text}"`,
+      `Câu hỏi thú vị! "${text.substring(0, 15)}..."`,
+      `Tôi đang xử lý yêu cầu về "${text}"`,
+      `Cảm ơn bạn đã hỏi về "${text.split(' ')[0]}"`
+    ];
+    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+    appendMessage(randomResponse, "bot");
+  }, 1500 + Math.random() * 1000);
+}
+
+sendBtn.onclick = sendMessage;
+
+// Send message on Enter, close on Escape
+userInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") sendMessage();
+  if (e.key === "Escape") toggleChat();
+});
+
+// Keep chat box position fixed when scrolling
+window.addEventListener("scroll", () => {
+  if (isChatOpen) {
+    const bubbleRect = bubble.getBoundingClientRect();
+    const chatWidth = chatBox.offsetWidth;
+    
+    // Recalculate position on scroll
+    let left = bubbleRect.left + bubble.offsetWidth/2 - chatWidth/2;
+    if (left < 10) left = 10;
+    if (left + chatWidth > window.innerWidth - 10) {
+      left = window.innerWidth - chatWidth - 10;
+    }
+    
+    chatBox.style.left = left + "px";
+    chatBox.style.bottom = (window.innerHeight - bubbleRect.top + 20) + "px";
+  }
+});
 </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </body>
 </html>

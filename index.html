@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zip Chatbot</title>
+<style>
+  body { margin: 0; font-family: sans-serif; }
+
+  #chat-bubble {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background-color: #ff7eb9;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    z-index: 9999;
+    transition: all 0.3s;
+  }
+
+  #chat-bubble img { width: 30px; height: 30px; }
+
+  #chat-box {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 350px;
+    height: 480px;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    background: white;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 9999;
+  }
+
+  #chat-header {
+    background: #ff7eb9;
+    color: white;
+    padding: 10px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  #chat-messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+  }
+
+  .msg {
+    margin: 8px 0;
+    padding: 8px 12px;
+    border-radius: 12px;
+    max-width: 75%;
+    line-height: 1.4;
+  }
+
+  .user { background: #e0ffe0; align-self: flex-end; }
+  .bot { background: #f0f0f0; align-self: flex-start; }
+
+  #chat-input {
+    display: flex;
+    border-top: 1px solid #ccc;
+  }
+
+  #chat-input input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    outline: none;
+  }
+
+  #chat-input button {
+    background: #ff7eb9;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div id="chat-bubble" title="Chat với Zip 🤖">
+  <img src="https://cdn-icons-png.flaticon.com/512/134/134914.png">
+</div>
+
+<div id="chat-box">
+  <div id="chat-header">Zip Chatbot 💬</div>
+  <div id="chat-messages"></div>
+  <div id="chat-input">
+    <input type="text" id="userInput" placeholder="Nhập tin nhắn...">
+    <button id="sendBtn">Gửi</button>
+  </div>
+</div>
+
+<script>
+const bubble = document.getElementById("chat-bubble");
+const chatBox = document.getElementById("chat-box");
+let dragging = false, offsetX, offsetY;
+
+bubble.addEventListener("click", () => {
+  chatBox.style.display = (chatBox.style.display === "flex") ? "none" : "flex";
+});
+
+bubble.addEventListener("mousedown", e => {
+  dragging = true;
+  offsetX = e.clientX - bubble.getBoundingClientRect().left;
+  offsetY = e.clientY - bubble.getBoundingClientRect().top;
+  bubble.style.cursor = "grabbing";
+});
+
+document.addEventListener("mousemove", e => {
+  if (!dragging) return;
+  bubble.style.left = e.clientX - offsetX + "px";
+  bubble.style.top = e.clientY - offsetY + "px";
+  bubble.style.bottom = "auto";
+  bubble.style.right = "auto";
+});
+
+document.addEventListener("mouseup", () => {
+  dragging = false;
+  bubble.style.cursor = "grab";
+});
+
+const sendBtn = document.getElementById("sendBtn");
+const userInput = document.getElementById("userInput");
+const messages = document.getElementById("chat-messages");
+
+function appendMessage(text, sender) {
+  const msg = document.createElement("div");
+  msg.classList.add("msg", sender);
+  msg.textContent = text;
+  messages.appendChild(msg);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+sendBtn.onclick = async () => {
+  const text = userInput.value.trim();
+  if (!text) return;
+  appendMessage(text, "user");
+  userInput.value = "";
+  appendMessage("Đang xử lý...", "bot");
+
+  setTimeout(() => {
+    messages.lastChild.textContent = "🤖 Zip trả lời: " + text.split("").reverse().join("");
+  }, 800);
+};
+</script>
+</body>
+</html>
